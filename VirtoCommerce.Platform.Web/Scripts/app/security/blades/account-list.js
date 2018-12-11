@@ -1,6 +1,6 @@
-﻿angular.module('platformWebApp')
-.controller('platformWebApp.accountListController', ['$scope', 'platformWebApp.accounts', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils',
-function ($scope, accounts, dialogService, uiGridHelper, bladeNavigationService, bladeUtils) {
+angular.module('platformWebApp')
+.controller('platformWebApp.accountListController', ['$scope', 'platformWebApp.accounts', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.authService',
+function ($scope, accounts, dialogService, uiGridHelper, bladeNavigationService, bladeUtils, authService) {
     $scope.uiGridConstants = uiGridHelper.uiGridConstants;
     var blade = $scope.blade;
 
@@ -46,7 +46,12 @@ function ($scope, accounts, dialogService, uiGridHelper, bladeNavigationService,
                 if (remove) {
                     bladeNavigationService.closeChildrenBlades(blade, function () {
                         var itemIds = _.pluck(selection, 'userName');
-                        accounts.remove({ names: itemIds }, blade.refresh);
+                        accounts.remove({ names: itemIds }, function () {
+                            if (authService.userName && itemIds.indexOf(authService.userName) !== -1) {
+                                authService.logout();
+                            }
+                            blade.refresh();
+                        });
                     });
                 }
             }
